@@ -1,0 +1,11 @@
+
+
+const layout = ({children}) => {
+  return (
+    <div className='flex justify-center items-center w-screen h-screen'>
+        {children}
+    </div>
+  )
+}
+
+export default layout
