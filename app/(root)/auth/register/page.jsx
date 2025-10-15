@@ -11,7 +11,7 @@ import { useForm } from "react-hook-form"
 import { FaRegEyeSlash } from "react-icons/fa";
 import { FaRegEye } from "react-icons/fa6";
 import { Button } from "@/components/ui/button"
-import {z} from 'zod'
+import { z } from 'zod'
 import {
     Form,
     FormControl,
@@ -25,33 +25,53 @@ import { Input } from "@/components/ui/input"
 import ButtonLoadder from "@/components/Application/ButtonLoadder"
 import Link from "next/link"
 import { WEBSITE_FORGOTPASSWORD, WEBSITE_LOGIN, WEBSITE_Register } from "@/routes/WebsiteRoutes"
+import axios from "axios"
+import { toast } from "react-toastify"
 const RegisterPage = () => {
-   const [loading, setloading] = useState(false)
-   const [showPassword, setshowPassword] = useState(false)
-   const [ShowConfirmPassword, setShowConfirmPassword] = useState(false)
+    const [loading, setloading] = useState(false)
+    const [showPassword, setshowPassword] = useState(false)
+    const [ShowConfirmPassword, setShowConfirmPassword] = useState(false)
     const formSchema = zSchema.pick({
-    email: true,name:true,password:true
-    
-}).extend({ConfirmPassword: z
-    .string()
-    .min(1, "Please confirm your password."
-    )}).refine((data)=>data.password===data.ConfirmPassword,{
-        message:"Passwords do not match",
-        path:["ConfirmPassword"]
+        email: true, name: true, password: true
+
+    }).extend({
+        ConfirmPassword: z
+            .string()
+            .min(1, "Please confirm your password."
+            )
+    }).refine((data) => data.password === data.ConfirmPassword, {
+        message: "Passwords do not match",
+        path: ["ConfirmPassword"]
     })
 
-const form = useForm({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-        name: "",
-        email: "",
-        password: "",
-        ConfirmPassword:""
-    },
-})
-const handleLoginSubmit = async (values) => {
- console.log(values)
-}
+    const form = useForm({
+        resolver: zodResolver(formSchema),
+        defaultValues: {
+            name: "",
+            email: "",
+            password: "",
+            ConfirmPassword: ""
+        },
+    })
+    const handleLoginSubmit = async (values) => {
+        try {
+            setloading(true)
+            const { data: ResponseRegistration } = await axios.post('/api/auth/register', values)
+            if (!ResponseRegistration.success) {
+                toast.error(ResponseRegistration.message) 
+            }
+             if (ResponseRegistration.success) { 
+                    form.reset()
+                  alert(ResponseRegistration.message)
+                }
+        } catch (error) {
+            toast.error(error)
+        }finally {
+            setloading(false)
+        }
+
+
+    }
     return (
         <Card className='w-[400px] '>
             <CardContent>
@@ -95,17 +115,20 @@ const handleLoginSubmit = async (values) => {
                                     )}
                                 />
                             </div>
-                            <div className="mb-3 relative">
+                            <div className="mb-3 ">
                                 <FormField
                                     control={form.control}
                                     name="password"
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel>Password</FormLabel>
+                                            <div className="relative">
+
                                             <FormControl>
-                                                <Input type={showPassword? 'text': 'password'} placeholder="********" {...field} />
+                                                <Input className='' type={showPassword ? 'text' : 'password'} placeholder="********" {...field} />
                                             </FormControl>
-                                          <button className="absolute cursor-pointer top-[55%] right-3" type="button" onClick={()=> setshowPassword(!showPassword)}>{showPassword? <FaRegEyeSlash/> : <FaRegEye/>}</button>
+                                            <button className="absolute cursor-pointer top-[30%] right-3" type="button" onClick={() => setshowPassword(!showPassword)}>{showPassword ? <FaRegEyeSlash /> : <FaRegEye />}</button>
+                                            </div>
                                             <FormMessage />
                                         </FormItem>
                                     )}
@@ -118,23 +141,26 @@ const handleLoginSubmit = async (values) => {
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel>Confirm Password</FormLabel>
+                                            <div className="relative">
+
                                             <FormControl>
-                                                <Input type={ShowConfirmPassword? 'text': 'password'} placeholder="********" {...field} />
+                                                <Input type={ShowConfirmPassword ? 'text' : 'password'} placeholder="********" {...field} />
                                             </FormControl>
-                                          <button className="absolute cursor-pointer top-[55%] right-3" type="button" onClick={()=> setShowConfirmPassword(!ShowConfirmPassword)}>{ShowConfirmPassword? <FaRegEyeSlash/> : <FaRegEye/>}</button>
+                                            <button className="absolute cursor-pointer top-[30%] right-3" type="button" onClick={() => setShowConfirmPassword(!ShowConfirmPassword)}>{ShowConfirmPassword ? <FaRegEyeSlash /> : <FaRegEye />}</button>
+                                            </div>
                                             <FormMessage />
                                         </FormItem>
                                     )}
                                 />
                             </div>
-                            <div><ButtonLoadder className='w-full cursor-pointer mt-1' type={'submit'} text={'Create Account'} loading={loading}  /></div>
+                            <div><ButtonLoadder className='w-full cursor-pointer mt-1' type={'submit'} text={'Create Account'} loading={loading} /></div>
                         </form>
                     </Form>
                     <div className="flex items-center justify-center gap-1 mt-2">
                         <p>Already have account?</p>
                         <Link href={WEBSITE_LOGIN} className="text-primary underline">Login!</Link>
                     </div>
-                   
+
                 </div>
             </CardContent>
         </Card>

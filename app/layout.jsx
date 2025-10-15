@@ -1,4 +1,5 @@
 
+import { ToastContainer } from "react-toastify";
 import "./globals.css";
 import {Assistant} from "next/font/google";
 const assistentFont=Assistant({
@@ -16,8 +17,10 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body
+
         className={`${assistentFont.className} antialiased`}
       >
+        <ToastContainer />
         {children}
       </body>
     </html>
