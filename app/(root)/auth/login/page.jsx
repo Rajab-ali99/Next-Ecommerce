@@ -24,6 +24,8 @@ import { Input } from "@/components/ui/input"
 import ButtonLoadder from "@/components/Application/ButtonLoadder"
 import Link from "next/link"
 import { WEBSITE_FORGOTPASSWORD, WEBSITE_Register } from "@/routes/WebsiteRoutes"
+import { toast } from "react-toastify"
+import axios from "axios"
 
 const LoginPage = () => {
    const [loading, setloading] = useState(false)
@@ -43,7 +45,21 @@ const form = useForm({
     },
 })
 const handleLoginSubmit = async (values) => {
- console.log(values)
+  try {
+            setloading(true)
+            const { data: ResponseRegistration } = await axios.post('/api/auth/login', values)
+            if (!ResponseRegistration.success) {
+                toast.error(ResponseRegistration.message) 
+            }
+             if (ResponseRegistration.success) { 
+                    form.reset()
+                  toast.success(ResponseRegistration.message)
+                }
+        } catch (error) {
+            toast.error(error)
+        }finally {
+            setloading(false)
+        }
 }
     return (
         <Card className='w-[400px] '>

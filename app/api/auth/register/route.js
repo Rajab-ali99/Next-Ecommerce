@@ -4,6 +4,7 @@ import { sendMail } from "@/lib/SendMail";
 import { zSchema } from "@/lib/zodSchema";
 import userModel from "@/models/userModel";
 import { SignJWT } from "jose";
+import { emailVerificationLink } from '@/Email/emailVerification';
 
 export async function POST(request){
     try {
@@ -31,7 +32,7 @@ export async function POST(request){
         .setExpirationTime('1h')
         .setProtectedHeader({alg:'HS256'})
         .sign(secret);
-        await sendMail(email,'Email verificaton request from E-Store ',`${process.env.NEXT_PUBLIC_BASE_URL}/auth/verify-email/${token}`);
+        await sendMail(email,'Email verificaton request from E-Store ',emailVerificationLink(`${process.env.NEXT_PUBLIC_BASE_URL}/auth/verify-email/${token}`));
         return response(200,true,"User registered successfully. Please verify your email to activate your account.")
     } catch (error) {
         return Error(error)

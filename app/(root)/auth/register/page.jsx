@@ -62,7 +62,7 @@ const RegisterPage = () => {
             }
              if (ResponseRegistration.success) { 
                     form.reset()
-                  alert(ResponseRegistration.message)
+                  toast.warning(ResponseRegistration.message)
                 }
         } catch (error) {
             toast.error(error)
