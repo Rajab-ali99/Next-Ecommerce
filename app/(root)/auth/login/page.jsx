@@ -28,12 +28,14 @@ import { toast } from "react-toastify"
 import axios from "axios"
 import { set } from "mongoose"
 import OtpVerification from "@/components/Application/OtpVerification"
-
+import {useDispatch} from 'react-redux'
+import { login } from "@/store/reducer/authReducer"
 const LoginPage = () => {
     const [otpEmail, setotpEmail] = useState('')
     const [OtpVerifyloading, setOtpVerifyloading] = useState(false)
     const [loading, setloading] = useState(false)
     const [showPassword, setshowPassword] = useState(false)
+    const dispatch = useDispatch()
     const formSchema = zSchema.pick({
         email: true,
 
@@ -72,13 +74,14 @@ const LoginPage = () => {
     const handleOTPSubmit = async(values)=>{
          try {
             setOtpVerifyloading(true)
-            const { data: ResponseRegistration } = await axios.post('/api/auth/otp-verify', values)
-            if (!ResponseRegistration.success) {
-                toast.error(ResponseRegistration.message)
+            const { data: otpResponse } = await axios.post('/api/auth/otp-verify', values)
+            if (!otpResponse.success) {
+                toast.error(otpResponse.message)
             }
-            if (ResponseRegistration.success) {
-                toast.success(ResponseRegistration.message)
+            if (otpResponse.success) {
+                toast.success(otpResponse.message)
                 setotpEmail('')
+                dispatch(login(otpResponse.data))
             }
         } catch (error) {
             toast.error(error)
