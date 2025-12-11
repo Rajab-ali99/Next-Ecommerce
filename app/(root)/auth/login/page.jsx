@@ -23,19 +23,23 @@ import {
 import { Input } from "@/components/ui/input"
 import ButtonLoadder from "@/components/Application/ButtonLoadder"
 import Link from "next/link"
-import { WEBSITE_FORGOTPASSWORD, WEBSITE_Register } from "@/routes/WebsiteRoutes"
+import { WEBSITE_DASHBOARD, WEBSITE_FORGOTPASSWORD, WEBSITE_Register } from "@/routes/WebsiteRoutes"
 import { toast } from "react-toastify"
 import axios from "axios"
 import { set } from "mongoose"
 import OtpVerification from "@/components/Application/OtpVerification"
 import {useDispatch} from 'react-redux'
 import { login } from "@/store/reducer/authReducer"
+import { useRouter, useSearchParams } from "next/navigation"
+import { ADMIN_DASHBOARD } from "@/routes/AdminPannelRoutes"
 const LoginPage = () => {
     const [otpEmail, setotpEmail] = useState('')
     const [OtpVerifyloading, setOtpVerifyloading] = useState(false)
     const [loading, setloading] = useState(false)
     const [showPassword, setshowPassword] = useState(false)
     const dispatch = useDispatch()
+    const router = useRouter();
+    const useSearchParam = useSearchParams();
     const formSchema = zSchema.pick({
         email: true,
 
@@ -55,13 +59,13 @@ const LoginPage = () => {
     const handleLoginSubmit = async (values) => {
         try {
             setloading(true)
-            const { data: ResponseRegistration } = await axios.post('/api/auth/login', values)
-            if (!ResponseRegistration.success) {
-                toast.error(ResponseRegistration.message)
+            const { data: ResponseLogin } = await axios.post('/api/auth/login', values)
+            if (!ResponseLogin.success) {
+                toast.error(ResponseLogin.message)
             }
-            if (ResponseRegistration.success) {
+            if (ResponseLogin.success) {
                 form.reset()
-                toast.success(ResponseRegistration.message)
+                toast.success(ResponseLogin.message)
                 setotpEmail(values.email)
             }
         } catch (error) {
@@ -82,6 +86,11 @@ const LoginPage = () => {
                 toast.success(otpResponse.message)
                 setotpEmail('')
                 dispatch(login(otpResponse.data))
+                if(useSearchParam.has('callback')){
+                    router.push(useSearchParams.get('callback'))
+                }else{
+                    otpResponse.data.role==='admin'? router.push(ADMIN_DASHBOARD) : router.push(WEBSITE_DASHBOARD )
+                }
             }
         } catch (error) {
             toast.error(error)

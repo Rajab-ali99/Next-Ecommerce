@@ -1,16 +1,14 @@
 'use client'
-
-
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Card, CardContent } from '@/components/ui/card'
-import React, { useState } from 'react'
+
+import React, { use, useState } from 'react'
 import Logo from "@/public/assets/images/logo-black.png"
 import Image from 'next/image'
 import { zSchema } from "@/lib/zodSchema"
 import { useForm } from "react-hook-form"
 import { FaRegEyeSlash } from "react-icons/fa";
 import { FaRegEye } from "react-icons/fa6";
-import { Button } from "@/components/ui/button"
+
 import { z } from 'zod'
 import {
     Form,
@@ -23,16 +21,18 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import ButtonLoadder from "@/components/Application/ButtonLoadder"
-import Link from "next/link"
-import { WEBSITE_FORGOTPASSWORD, WEBSITE_LOGIN, WEBSITE_Register } from "@/routes/WebsiteRoutes"
 import axios from "axios"
 import { toast } from "react-toastify"
-const RegisterPage = () => {
+
+import { WEBSITE_LOGIN } from "@/routes/WebsiteRoutes"
+import { useRouter } from "next/navigation"
+const ResetPassword = ({email}) => {
+    const router = useRouter();
     const [loading, setloading] = useState(false)
     const [showPassword, setshowPassword] = useState(false)
     const [ShowConfirmPassword, setShowConfirmPassword] = useState(false)
     const formSchema = zSchema.pick({
-        email: true, name: true, password: true
+        email: true,  password: true
 
     }).extend({
         ConfirmPassword: z
@@ -47,22 +47,23 @@ const RegisterPage = () => {
     const form = useForm({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            name: "",
-            email: "",
+           
+            email: email,
             password: "",
             ConfirmPassword: ""
         },
     })
-    const handleLoginSubmit = async (values) => {
+    const handleResetPassword = async (values) => {
         try {
             setloading(true)
-            const { data: ResponseRegistration } = await axios.post('/api/auth/register', values)
+            const { data: ResponseRegistration } = await axios.put('/api/auth/forgot-password/reset-password', values)
             if (!ResponseRegistration.success) {
                 toast.error(ResponseRegistration.message) 
             }
              if (ResponseRegistration.success) { 
                     form.reset()
                   toast.success(ResponseRegistration.message)
+                  router.push(WEBSITE_LOGIN);
                 }
         } catch (error) {
             toast.error(error)
@@ -73,48 +74,19 @@ const RegisterPage = () => {
 
     }
     return (
-        <Card className='w-[400px] '>
-            <CardContent>
+        
+            <div>
                 <div className='flex justify-center'>
                     <Image className='max-w-[150px]' src={Logo.src} width={Logo.width} height={Logo.height} alt='Logo' />
                 </div>
                 <div className="text-center">
-                    <h1 className='text-3xl font-bold'>Create Account</h1>
-                    <p className="text-slate-400">Create your account by filling out the form bellow.</p>
+                    <h1 className='text-3xl font-bold'>Update Password</h1>
+                    <p className="text-slate-400">Create new password by filling the form below.</p>
                 </div>
                 <div className="mt-5">
                     <Form {...form}>
-                        <form onSubmit={form.handleSubmit(handleLoginSubmit)} >
-                            <div className="mb-3">
-                                <FormField
-                                    control={form.control}
-                                    name="name"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Full Name</FormLabel>
-                                            <FormControl>
-                                                <Input type='text' placeholder="John" {...field} />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                            </div>
-                            <div className="mb-3">
-                                <FormField
-                                    control={form.control}
-                                    name="email"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Email</FormLabel>
-                                            <FormControl>
-                                                <Input type='email' placeholder="example@gmail.com" {...field} />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                            </div>
+                        <form onSubmit={form.handleSubmit(handleResetPassword)} >
+                            
                             <div className="mb-3 ">
                                 <FormField
                                     control={form.control}
@@ -153,18 +125,14 @@ const RegisterPage = () => {
                                     )}
                                 />
                             </div>
-                            <div><ButtonLoadder className='w-full cursor-pointer mt-1' type={'submit'} text={'Create Account'} loading={loading} /></div>
+                            <div><ButtonLoadder className='w-full cursor-pointer mt-1' type={'submit'} text={'Reset Password'} loading={loading} /></div>
                         </form>
                     </Form>
-                    <div className="flex items-center justify-center gap-1 mt-2">
-                        <p>Already have account?</p>
-                        <Link href={WEBSITE_LOGIN} className="text-primary underline">Login!</Link>
-                    </div>
 
                 </div>
-            </CardContent>
-        </Card>
+            </div>
+        
     )
 }
 
-export default RegisterPage
+export default ResetPassword
